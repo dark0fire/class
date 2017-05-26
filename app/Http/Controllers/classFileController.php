@@ -7,10 +7,10 @@ use Illuminate\Support\Facades\Storage;
 
 class classFileController extends Controller
 {
-    public $regexStrings = null;
+    public $content = null;
     public $functions = null;
     public $members = null;
-    public $content = null;
+    public $regexStrings = null;
 
     function __construct($content = '')
     {
@@ -19,7 +19,7 @@ class classFileController extends Controller
         $regexStrings = &$this->regexStrings;
         $regexStrings->functionName = '/(\t| {4})(\w+\s)+?(?<!new |return )\&?(\w+)\(/';
         $regexStrings->functions = '/(.*\/\*\*(.*\n\N)+?(.*\*\/\n))?(\t| {4})(static|function|protected|public|private|final).*\n(\t| {4}){(.*\n)*?(\t| {4})}/';
-        $regexStrings->members = '/(.*\/\*\*(.*\n\N)+?(.*\*\/\n))?(\t|\s{4})(public|protected|static|private|final).*(;|(\[\n)(.*\n)+?(.*;))/';
+        $regexStrings->members = '/(.*\/\*\*(.*\n\N)+?(.*\*\/\n))?(\t| {4})(public|protected|static|private|final).*(;|(\[\n)(.*\n)+?(.*;))/';
         $regexStrings->classStart = '/class.*\n?{.*\n/';
         $regexStrings->memberName = '/(public|static|private|protected)+ \$(\w*)/';
         $regexStrings->roqueDocumentation = '/(.*\/\*\*(.*\n\N)+?(.*\*\/\n))\t?\n/';
@@ -31,19 +31,13 @@ class classFileController extends Controller
                 dump('roque documentation found');
                 dump($item);
             }
-
         }
     }
 
-    /**
-     * TODO Needs to be moved from class
-     */
-    function testfunction()
+    function getClassStartOffset()
     {
-        $content = Storage::disk('controllers')->get('classFileController.php');
-        $classFileController = new classFileController($content);
-//        dump($classFileController->sortFunctionsAlphabet());
-        dump($classFileController->sortMembersAlphabeth());
+        preg_match($this->regexStrings->classStart,$this->content, $matches, PREG_OFFSET_CAPTURE);
+        return $matches[0][1] + strlen($matches[0][0]);
     }
 
     function &getContentInstance()
@@ -51,7 +45,19 @@ class classFileController extends Controller
         return $this->content;
     }
 
+    function grabFunctions($class)
+    {
+        $result = null;
+        preg_match_all($this->regexStrings->functions, $class, $result);
+        return $result;
+    }
 
+    function grabMembers($class)
+    {
+        $result = null;
+        preg_match_all($this->regexStrings->members, $class, $result);
+        return $result;
+    }
 
     function sortFunctionsAlphabet()
     {
@@ -145,32 +151,21 @@ class classFileController extends Controller
         return $content;
     }
 
-    function getClassStartOffset()
-    {
-        preg_match($this->regexStrings->classStart,$this->content, $matches, PREG_OFFSET_CAPTURE);
-        return $matches[0][1] + strlen($matches[0][0]);
-    }
-
-
-
-
-    function grabFunctions($class)
-    {
-        $result = null;
-        preg_match_all($this->regexStrings->functions, $class, $result);
-        return $result;
-    }
-
-
-    function grabMembers($class)
-    {
-        $result = null;
-        preg_match_all($this->regexStrings->members, $class, $result);
-        return $result;
-    }
-
     function stripContent($content, $original)
     {
         return str_replace ( $content ,'' , $original);
     }
+
+    /**
+     * TODO Needs to be moved from class
+     */
+    function testfunction()
+    {
+        $content = Storage::disk('controllers')->get('classFileController.php');
+        $classFileController = new classFileController($content);
+//        dump($classFileController->sortFunctionsAlphabet());
+        dump($classFileController->sortMembersAlphabeth());
+        Storage::disk('controllers')->put('classFileController.php',$classFileController->content);
+    }
+
 }
