@@ -53,6 +53,11 @@ return [
             'root' => base_path('app/http/controllers'),
         ],
 
+        'library' => [
+            'driver' => 'local',
+            'root' => base_path('app/Library'),
+        ],
+
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),

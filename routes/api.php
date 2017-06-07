@@ -16,3 +16,4 @@ use Illuminate\Http\Request;
 Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:api');
+//hacksaw piloted orchid upright hesitate younger demonstrate owed omission cajun noted melting melting
