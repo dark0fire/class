@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\DataTables\materials;
 use App\Library\Tools\classFileHandler;
+use App\material;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -16,14 +18,17 @@ class classFileController extends Controller
     /**
      * TODO Needs to be moved from class
      */
-    function testfunction()
+    function testfunction(materials $mat)
     {
 //        $content = Storage::disk('library')->get('Tools/classFileHandler.php');
         $content = Storage::disk('controllers')->get('classFileController.php');
         $classFileHandler = new classFileHandler($content);
-        dump($classFileHandler->alphabetize());
+//        dump($classFileHandler->alphabetize());
         $this->getRoqueDocumentations();
         $this->getRoqueFunctions();
+        return $mat->render('vue');
+        dump(material::viewProperties());
+        return view('vue');
 //        Storage::disk('controllers')->put('classFileController.php',$classFileController->content);
     }
 
@@ -33,7 +38,7 @@ class classFileController extends Controller
         $content = Storage::disk('controllers')->get('classFileController.php');
         $classFileHandler = new classFileHandler($content);
         $result = $classFileHandler->getRoqueDocumentations();
-        dump($result[0]);
+//        dump($result[0]);
 
     }
 
@@ -43,7 +48,7 @@ class classFileController extends Controller
         $content = Storage::disk('controllers')->get('classFileController.php');
         $classFileHandler = new classFileHandler($content);
         $result = $classFileHandler->getRoqueFunctions();
-        dump($result[1]);
+//        dump($result[1]);
     }
 
     function dirk()
